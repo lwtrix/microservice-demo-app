@@ -1,31 +1,38 @@
 import express from "express";
-import { randomBytes } from 'crypto'
-import bodyParser from 'body-parser'
-import cors from 'cors'
+import { randomBytes } from "crypto";
+import bodyParser from "body-parser";
+import axios from "axios";
+import cors from "cors";
 
-const app = express()
-app.use(bodyParser.json())
-app.use(cors())
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
 
-const posts = {
-    "55eb8dae": {
-        id: "55eb8dae",
-        title: "good post"
-    }
-}
+const posts = {};
 
-app.get('/posts', (req, res) => {
-    res.send(posts)
-})
+app.get("/posts", (req, res) => {
+  res.send(posts);
+});
 
-app.post('/posts', (req, res) => {
-    const id = randomBytes(4).toString('hex')
-    const { title } = req.body
+app.post("/posts", async (req, res) => {
+  const id = randomBytes(4).toString("hex");
+  const { title } = req.body;
 
-    posts[id] = { id, title }
-    res.status(201).send(posts[id])
-})
+  const newPost = { id, title };
+  posts[id] = newPost;
 
-app.listen('4000', () => {
-    console.log('Live on port 4000')
-})
+  const eventToSend = { type: "POST_CREATED", data: newPost };
+  await axios.post("http://localhost:4005/events", eventToSend);
+
+  res.status(201).send(posts[id]);
+});
+
+app.post("/events", (req, res) => {
+  console.log(`Event received: ${req.body.type}`);
+
+  res.send({});
+});
+
+app.listen("4000", () => {
+  console.log("POSTS SERVICE: Live on port 4000");
+});
