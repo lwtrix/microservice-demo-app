@@ -22,7 +22,7 @@ app.post("/posts", async (req, res) => {
   posts[id] = newPost;
 
   const eventToSend = { type: "POST_CREATED", data: newPost };
-  await axios.post("http://localhost:4005/events", eventToSend);
+  await axios.post("http://event-bus-srv:4005/events", eventToSend);
 
   res.status(201).send(posts[id]);
 });
@@ -33,6 +33,7 @@ app.post("/events", (req, res) => {
   res.send({});
 });
 
-app.listen("4000", () => {
+app.listen(4000, () => {
+  console.log('v3')
   console.log("POSTS SERVICE: Live on port 4000");
 });

@@ -28,14 +28,14 @@ app.post("/posts/:id/comments", async (req, res) => {
   commentsByPostId[req.params.id] = commentsArr;
 
   const eventToSend = { type: "COMMENT_CREATED", data: newComment };
-  await axios.post("http://localhost:4005/events", eventToSend);
+  await axios.post("http://event-bus-srv:4005/events", eventToSend);
 
   res.status(201).send(commentsByPostId[req.params.id]);
 });
 
 app.post("/events", async (req, res) => {
-  console.log(`Event received: ${req.body.type}`);
   const { type, data } = req.body;
+  console.log(`Event received: ${type}`);
 
   if (type === "COMMENT_MODERATED") {
     const { postId, id, status, content } = data;
@@ -45,7 +45,7 @@ app.post("/events", async (req, res) => {
 
     comment.status = status;
 
-    await axios.post("http://localhost:4005/events", {
+    await axios.post("http://event-bus-srv:4005/events", {
       type: "COMMENT_UPDATED",
       data: {
         id,
